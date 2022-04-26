@@ -51,7 +51,7 @@ build-windows:
     # # - GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build -o $BUILD_NAME_WINDOWS ./cmd/main.go
     # - GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CXX_FOR_TARGET=i686-w64-mingw32-g++ CC_FOR_TARGET=i686-w64-mingw32-gcc go build -o $BUILD_NAME_WINDOWS ./cmd/main.go
 
-   - GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -tags static -o $BUILD_NAME_WINDOWS ./cmd/main.go
+   - GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build -ldflags='-linkmode=external -extldflags "-static" -s -w' -o $BUILD_NAME_WINDOWS ./cmd/main.go
   artifacts:
     name: "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME-BUILD_NAME_WINDOWS"
     paths:
