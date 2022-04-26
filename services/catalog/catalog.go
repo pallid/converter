@@ -9,9 +9,13 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"runtime"
 
 	"syscall"
 	"time"
+
+	"github.com/gammazero/workerpool"
+	"github.com/shirou/gopsutil/cpu"
 )
 
 const (
@@ -27,12 +31,11 @@ type CatalogService struct {
 	startPath   string
 	targetPath  string
 	converter   pdf.Converter
-	qmQueue     chan task
-	queueClose  bool
 	timeout     time.Duration
 	shutdown    chan shutdown
 	shutdownErr chan shutdown
 	metrics     *metrics
+	wp          *workerpool.WorkerPool
 }
 
 type task struct {
@@ -42,16 +45,25 @@ type task struct {
 
 func Start(startPath, targetPath string, c pdf.Converter, timeoutSec time.Duration) {
 
+	log.Printf("[INFO] Запуск конвертации")
+
 	if timeoutSec == 0 {
 		timeoutSec = idleTimeoutSec
 	}
+
+	logocal := false
+	MAX_PROC, err := cpu.Counts(logocal)
+	if err != nil {
+		log.Printf("[WARNING] ошибка определения количества потоков: %v", err)
+		MAX_PROC = 1
+	}
+	runtime.GOMAXPROCS(MAX_PROC)
+	log.Printf("[DEBUG] количество потоков: %d", MAX_PROC)
 
 	impl = CatalogService{
 		startPath:  startPath,
 		targetPath: targetPath,
 		converter:  c,
-		qmQueue:    make(chan task),
-		queueClose: false,
 		timeout:    timeoutSec,
 
 		// this channel is for graceful shutdown:
@@ -62,10 +74,9 @@ func Start(startPath, targetPath string, c pdf.Converter, timeoutSec time.Durati
 		metrics: &metrics{
 			StartDate: time.Now(),
 		},
+		wp: workerpool.New(MAX_PROC),
 	}
 
-	log.Printf("[INFO] Запуск конвертации")
-	go impl.dispatch()
 	log.Printf("[INFO] Исходный каталог: %s", impl.startPath)
 	impl.copyDirectory(impl.startPath, impl.targetPath)
 
@@ -119,66 +130,30 @@ func (cs CatalogService) copyDirectory(src, dst string) {
 }
 
 func (cs *CatalogService) Submit(n *processor.Entity) {
-	cs.qmQueue <- task{
-		e: n,
-	}
+	cs.wp.Submit(func() {
+		cs.processing(task{e: n})
+	})
+
 }
 
 // закрывает канал при вызове
 func (cs *CatalogService) Stop() {
-	close(cs.qmQueue)
-	cs.queueClose = true
+	cs.wp.StopWait()
 	log.Println(cs.metrics.GetStatistic())
 }
 
-func (cs *CatalogService) dispatch() {
-	timeout := time.NewTimer(time.Second * cs.timeout)
-	var (
-		arr        []task
-		curTask    task
-		ok         bool
-		inProgress bool
-	)
-Loop:
-	for {
-		timeout.Reset(cs.timeout)
-		select {
-		case curTask, ok = <-cs.qmQueue:
-			if !ok {
-				break Loop
-			}
-			arr = append(arr, curTask)
-		case <-timeout.C:
-			if inProgress {
-				break Loop
-			}
-			inProgress = true
-			if len(arr) != 0 {
-				if err := cs.processing(arr); err != nil {
-					log.Println("[CONVERT] error: ", err)
-					cs.shutdown <- shutdown{}
-				}
-				arr = make([]task, 0)
-			}
-			inProgress = false
-			if cs.metrics.Find == cs.metrics.Done+cs.metrics.Error && len(cs.qmQueue) == 0 {
-				cs.metrics.FinishDate = time.Now()
-				cs.shutdown <- shutdown{}
-			}
-		}
-	}
-}
-
 //processing
-func (cs *CatalogService) processing(tasks []task) error {
-	for _, t := range tasks {
-		log.Printf(" - convert start: %v\n", t.e.SourceFile)
-		if err := t.e.Convert(); err != nil {
-			cs.metrics.IncreaseError()
-			return err
-		}
-		log.Printf(" - convert finish: %v\n", t.e.SourceFile)
-		cs.metrics.IncreaseDone()
+func (cs *CatalogService) processing(t task) {
+	log.Printf(" - convert start: %v\n", t.e.SourceFile)
+	if err := t.e.Convert(); err != nil {
+		cs.metrics.IncreaseError()
+		log.Println("[Processing] error: ", err)
+		cs.shutdownErr <- shutdown{}
 	}
-	return nil
+	log.Printf(" - convert finish: %v\n", t.e.SourceFile)
+	cs.metrics.IncreaseDone()
+	if cs.metrics.Find == cs.metrics.Done+cs.metrics.Error {
+		cs.metrics.FinishDate = time.Now()
+		cs.shutdown <- shutdown{}
+	}
 }
