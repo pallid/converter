@@ -46,7 +46,7 @@ build-windows:
   image: golang:1.18
   stage: build
   script:
-    - apt-get install gcc-mingw-w64
+    - apt install gcc-mingw-w64
     # - go get github.com/karmdip-mi/go-fitz
     - GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build -o $BUILD_NAME_WINDOWS ./cmd/main.go
   artifacts:
