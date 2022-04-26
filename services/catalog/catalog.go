@@ -21,11 +21,6 @@ import (
 	"github.com/shirou/gopsutil/cpu"
 )
 
-const (
-	// Время простоя таймера перед
-	idleTimeoutSec = 10
-)
-
 var impl CatalogService
 
 type shutdown struct{}
@@ -34,7 +29,6 @@ type CatalogService struct {
 	startPath   string
 	targetPath  string
 	converter   pdf.Converter
-	timeout     time.Duration
 	shutdown    chan shutdown
 	shutdownErr chan shutdown
 	metrics     *metrics
@@ -46,13 +40,9 @@ type task struct {
 	e   *processor.Entity
 }
 
-func Start(startPath, targetPath string, c pdf.Converter, timeoutSec time.Duration) {
+func Start(startPath, targetPath string, c pdf.Converter) {
 
 	log.Printf("[INFO] Запуск конвертации")
-
-	if timeoutSec == 0 {
-		timeoutSec = idleTimeoutSec
-	}
 
 	logocal := false
 	MAX_PROC, err := cpu.Counts(logocal)
@@ -67,7 +57,6 @@ func Start(startPath, targetPath string, c pdf.Converter, timeoutSec time.Durati
 		startPath:  startPath,
 		targetPath: targetPath,
 		converter:  c,
-		timeout:    timeoutSec,
 
 		// this channel is for graceful shutdown:
 		// if we receive an error, we can send it here to notify the server to be stopped
