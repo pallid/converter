@@ -12,6 +12,7 @@ import (
 	"os/signal"
 	"path"
 	"runtime"
+	"strings"
 
 	"syscall"
 	"time"
@@ -166,7 +167,7 @@ var _supportDocuments = []docs.DocumentFormat{
 
 func isSupportDocument(fileName string) bool {
 	ext := utils.GetExtensionFile(fileName)
-	extDF := docs.DocumentFormat(ext)
+	extDF := docs.DocumentFormat(strings.TrimPrefix(ext, "."))
 	for _, doc := range _supportDocuments {
 		if extDF == doc {
 			return true
