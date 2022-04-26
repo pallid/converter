@@ -1,0 +1,26 @@
+{
+    "version": "0.2",
+    "ignorePaths": [
+        "Dockerfile", 
+        "go.sum",
+        "go.mod",
+        "cspell.json",
+        "example.env",
+        "./source/*"
+    ],
+    "dictionaries": [
+        "ru-ru",
+        "custom"
+    ],
+    "words": [
+        "conv",
+        "fitz",
+        "karmdip",
+        "mupdf",
+        "shirou",
+        "gopsutil"
+    ],
+    "ignoreWords": [],
+    "import": ["@cspell/dict-ru_ru/cspell-ext.json"],
+    "enableFiletypes": []
+}

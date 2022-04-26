@@ -35,7 +35,7 @@ converter.exe -src "C:\folder\source" -tar "C:\folder\target"
 
 linux:
 ```
-converter.exe -src "./source" -tar "./target"
+converter -src ./source -tar ./target
 ```
 
 ## сборка из исходников
@@ -45,5 +45,5 @@ go build -o converter ./cmd/main.go
 
 ## зависимости
 ```
-github.com/karmdip-mi/go-fitz
+github.com/gen2brain/go-fitz
 ```

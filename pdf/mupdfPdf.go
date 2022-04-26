@@ -10,8 +10,8 @@ import (
 	"log"
 	"runtime"
 
-	// "github.com/gen2brain/go-fitz"
-	"github.com/karmdip-mi/go-fitz"
+	"github.com/gen2brain/go-fitz"
+	// "github.com/karmdip-mi/go-fitz"
 )
 
 const defaultQuality = 100
@@ -80,7 +80,7 @@ func imageToBytes(img image.Image, opts ConversionOptions) ([]byte, error) {
 	} else if opts.OutputFormat == ImageFormatPNG {
 		err = png.Encode(buf, img)
 	} else {
-		err = fmt.Errorf("unsuported format: %v", opts.OutputFormat)
+		err = fmt.Errorf("unsupported format: %v", opts.OutputFormat)
 	}
 	if err != nil {
 		return nil, err

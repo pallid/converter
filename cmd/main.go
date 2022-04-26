@@ -25,6 +25,6 @@ func main() {
 	flag.Parse()
 
 	conv := pdf.NewLocalConverter()
-	catalog.Start(sourceFolder, targerFolder, conv, 10)
+	catalog.Start(sourceFolder, targerFolder, conv)
 
 }

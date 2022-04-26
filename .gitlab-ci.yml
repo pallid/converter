@@ -1,0 +1,57 @@
+stages:
+  - test
+  - build
+
+variables:
+  BUILD_NAME_LINUX: $CI_PROJECT_NAME-linux64
+  BUILD_NAME_WINDOWS: $CI_PROJECT_NAME-windows64
+
+test:
+  stage: test
+  image: golang:1.18
+  script:
+    - go test -timeout 30s ./... -coverprofile=coverage.out
+    - go tool cover -func=coverage.out   
+  artifacts:
+    paths:
+      - coverage.out
+    expire_in: 1 day  
+  tags:
+    - docker
+
+spellcheck:
+  stage: test
+  image: node:12-alpine
+  script: 
+    - npm i -g cspell-cli
+    - npm install -g @cspell/dict-ru_ru
+    - cspell-cli -u -c cspell.json "**"
+  tags:
+  - docker
+  #allow_failure: true
+
+build-linux:
+  image: golang:1.17-alpine3.14
+  stage: build
+  script:
+    - apk add --no-cache build-base mupdf-dev freetype-dev harfbuzz-dev jbig2dec-dev jpeg-dev openjpeg-dev zlib-dev
+    - go mod download  && go build -tags musl -o $BUILD_NAME_LINUX ./cmd/main.go
+  artifacts:
+    name: "$BUILD_NAME_LINUX-$CI_COMMIT_REF_NAME"
+    paths:
+      - $BUILD_NAME_LINUX
+  tags:
+    - docker
+
+build-windows:
+  image: golang:1.17-alpine3.14
+  stage: build
+  script:
+    - apk add --no-cache build-base mupdf-dev freetype-dev harfbuzz-dev jbig2dec-dev jpeg-dev openjpeg-dev zlib-dev mingw-w64-gcc
+    - go mod download  && GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build -tags musl -o $BUILD_NAME_WINDOWS.exe ./cmd/main.go
+  artifacts:
+    name: "$BUILD_NAME_WINDOWS-$CI_COMMIT_REF_NAME"
+    paths:
+      - $BUILD_NAME_WINDOWS.exe
+  tags:
+    - docker    
