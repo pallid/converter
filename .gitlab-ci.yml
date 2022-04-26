@@ -30,23 +30,23 @@ spellcheck:
   - docker
   #allow_failure: true
 
-build-linux:
-  image: golang:1.18
-  stage: build
-  script:
-    - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o $BUILD_NAME_LINUX ./cmd/main.go
-  artifacts:
-    name: "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME-BUILD_NAME_LINUX"
-    paths:
-      - $BUILD_NAME_LINUX
-  tags:
-    - docker
+# build-linux:
+#   image: golang:1.18
+#   stage: build
+#   script:
+#     - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o $BUILD_NAME_LINUX ./cmd/main.go
+#   artifacts:
+#     name: "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME-BUILD_NAME_LINUX"
+#     paths:
+#       - $BUILD_NAME_LINUX
+#   tags:
+#     - docker
 
 build-windows:
   image: golang:1.18
   stage: build
   script:
-    - GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o $BUILD_NAME_WINDOWS ./cmd/main.go
+    - GOOS=windows go build -o $BUILD_NAME_WINDOWS ./cmd/main.go
   artifacts:
     name: "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME-BUILD_NAME_WINDOWS"
     paths:
