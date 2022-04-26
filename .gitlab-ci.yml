@@ -48,7 +48,7 @@ build-windows:
   stage: build
   script:
     - apk add --no-cache build-base mupdf-dev freetype-dev harfbuzz-dev jbig2dec-dev jpeg-dev openjpeg-dev zlib-dev mingw-w64-gcc
-    - go mod download  && GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build -tags compat -o $BUILD_NAME_WINDOWS ./cmd/main.go
+    - go mod download  && GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build -tags musl -o $BUILD_NAME_WINDOWS ./cmd/main.go
   artifacts:
     name: "$BUILD_NAME_WINDOWS-$CI_COMMIT_REF_NAME"
     paths:
