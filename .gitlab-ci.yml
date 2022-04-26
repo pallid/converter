@@ -30,19 +30,19 @@ variables:
 #   - docker
 #   #allow_failure: true
 
-build-linux:
-  image: golang:1.18
-  stage: build
-  script:
-    - SRCDIR=./
-    - GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -tags extlib -o $BUILD_NAME_LINUX ./cmd/main.go
-    # - CGO_LDFLAGS="-lmupdf -lm -lmupdf-third -lfreetype -ljbig2dec -lharfbuzz -ljpeg -lopenjp2 -lz" go build -tags nopie -o $BUILD_NAME_LINUX ./cmd/main.go
-  artifacts:
-    name: "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME-BUILD_NAME_LINUX"
-    paths:
-      - $BUILD_NAME_LINUX
-  tags:
-    - docker
+# build-linux:
+#   image: golang:1.18
+#   stage: build
+#   script:
+#     - SRCDIR=./
+#     - GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -tags extlib -o $BUILD_NAME_LINUX ./cmd/main.go
+#     # - CGO_LDFLAGS="-lmupdf -lm -lmupdf-third -lfreetype -ljbig2dec -lharfbuzz -ljpeg -lopenjp2 -lz" go build -tags nopie -o $BUILD_NAME_LINUX ./cmd/main.go
+#   artifacts:
+#     name: "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME-BUILD_NAME_LINUX"
+#     paths:
+#       - $BUILD_NAME_LINUX
+#   tags:
+#     - docker
 
 # build-windows:
 #   image: golang:1.18
@@ -61,3 +61,27 @@ build-linux:
 #   tags:
 #     - docker
 
+build-linux:
+  image: golang:1.17-alpine3.14
+  stage: build
+  script:
+    - apk add --no-cache \
+        build-base \
+        freetype-dev \
+        harfbuzz-dev \
+        jbig2dec-dev \
+        jpeg-dev \
+        mupdf mupdf-dev \
+        openjpeg-dev \
+        zlib-dev
+    - CGO_LDFLAGS="-lmupdf -lm -lmupdf-third -lfreetype -ljbig2dec -lharfbuzz -ljpeg -lopenjp2 -lz"
+    - go mod download
+    - go build -o $BUILD_NAME_LINUX ./cmd/main.go
+    # - GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -tags extlib -o $BUILD_NAME_LINUX ./cmd/main.go
+    # - CGO_LDFLAGS="-lmupdf -lm -lmupdf-third -lfreetype -ljbig2dec -lharfbuzz -ljpeg -lopenjp2 -lz" go build -tags nopie -o $BUILD_NAME_LINUX ./cmd/main.go
+  artifacts:
+    name: "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME-BUILD_NAME_LINUX"
+    paths:
+      - $BUILD_NAME_LINUX
+  tags:
+    - docker
