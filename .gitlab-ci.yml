@@ -47,7 +47,7 @@ build-windows:
   stage: build
   script:
     - go get github.com/karmdip-mi/go-fitz
-    - GOOS=windows go build -o $BUILD_NAME_WINDOWS ./cmd/main.go
+    - GOOS=windows GOARCH=amd64 CGO_ENABLED=1 go build -o $BUILD_NAME_WINDOWS ./cmd/main.go
   artifacts:
     name: "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME-BUILD_NAME_WINDOWS"
     paths:
