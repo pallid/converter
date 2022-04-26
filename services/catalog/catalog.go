@@ -2,8 +2,10 @@ package catalog
 
 import (
 	"context"
+	"converter/docs"
 	"converter/pdf"
 	"converter/processor"
+	"converter/utils"
 	"io/ioutil"
 	"log"
 	"os"
@@ -114,7 +116,7 @@ func (cs CatalogService) copyDirectory(src, dst string) {
 
 		if f.IsDir() {
 			cs.copyDirectory(newSrc, newDst)
-		} else if !f.IsDir() {
+		} else if !f.IsDir() && isSupportDocument(f.Name()) {
 			cs.metrics.IncreaseFind()
 			log.Printf(" - task to query: %s\n", newSrc)
 			cs.Submit(&processor.Entity{
@@ -156,4 +158,19 @@ func (cs *CatalogService) processing(t task) {
 		cs.metrics.FinishDate = time.Now()
 		cs.shutdown <- shutdown{}
 	}
+}
+
+var _supportDocuments = []docs.DocumentFormat{
+	docs.PDF,
+}
+
+func isSupportDocument(fileName string) bool {
+	ext := utils.GetExtensionFile(fileName)
+	extDF := docs.DocumentFormat(ext)
+	for _, doc := range _supportDocuments {
+		if extDF == doc {
+			return true
+		}
+	}
+	return false
 }
