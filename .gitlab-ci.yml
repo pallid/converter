@@ -68,7 +68,7 @@ build-linux:
     - apk add --no-cache build-base mupdf-dev freetype-dev harfbuzz-dev jbig2dec-dev jpeg-dev openjpeg-dev zlib-dev
     - go mod download  && go build -tags musl -o $BUILD_NAME_LINUX ./cmd/main.go
   artifacts:
-    name: "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME-BUILD_NAME_LINUX"
+    name: "$BUILD_NAME_LINUX-$CI_COMMIT_REF_NAME"
     paths:
       - $BUILD_NAME_LINUX
   tags:
