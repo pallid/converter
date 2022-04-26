@@ -52,6 +52,6 @@ build-windows:
   artifacts:
     name: "$BUILD_NAME_WINDOWS-$CI_COMMIT_REF_NAME"
     paths:
-      - $BUILD_NAME_WINDOWS
+      - $BUILD_NAME_WINDOWS.exe
   tags:
     - docker    
