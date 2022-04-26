@@ -34,7 +34,8 @@ build-linux:
   image: golang:1.18
   stage: build
   script:
-    - GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -tags nopie -o $BUILD_NAME_LINUX ./cmd/main.go
+    # - GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -tags nopie -o $BUILD_NAME_LINUX ./cmd/main.go
+    - CGO_LDFLAGS="-lmupdf -lm -lmupdf-third -lfreetype -ljbig2dec -lharfbuzz -ljpeg -lopenjp2 -lz" go build -tags nopie -o $BUILD_NAME_LINUX ./cmd/main.go
   artifacts:
     name: "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME-BUILD_NAME_LINUX"
     paths:
