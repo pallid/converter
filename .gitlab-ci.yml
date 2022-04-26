@@ -5,7 +5,6 @@ stages:
 variables:
   BUILD_NAME_LINUX: $CI_PROJECT_NAME-linux64
   BUILD_NAME_WINDOWS: $CI_PROJECT_NAME-windows64
-  SRCDIR: 
 
 # test:
 #   stage: test
