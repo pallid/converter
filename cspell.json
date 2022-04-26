@@ -6,7 +6,7 @@
         "go.mod",
         "cspell.json",
         "example.env",
-        "./source/*",
+        "./source/*"
     ],
     "dictionaries": [
         "ru-ru",
@@ -15,8 +15,9 @@
     "words": [
         "conv",
         "fitz",
-        "karmdip",
-        "mupdf"
+        "mupdf",
+        "shirou",
+        "gopsutil"
     ],
     "ignoreWords": [],
     "import": ["@cspell/dict-ru_ru/cspell-ext.json"],
