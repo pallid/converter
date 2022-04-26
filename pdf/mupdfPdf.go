@@ -10,8 +10,8 @@ import (
 	"log"
 	"runtime"
 
-	// "github.com/gen2brain/go-fitz"
-	"github.com/karmdip-mi/go-fitz"
+	"github.com/gen2brain/go-fitz"
+	// "github.com/karmdip-mi/go-fitz"
 )
 
 const defaultQuality = 100
